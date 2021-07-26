@@ -1,227 +1,250 @@
 /** @documenter yuidoc */
 
-import Component from '@ember/component';
-import layout from '../templates/components/color-picker';
+import Component from '@glimmer/component';
+import { tracked } from '@glimmer/tracking';
+import { arg } from 'ember-arg-types';
+import { object, func, string, bool, number, array } from 'prop-types';
 
 import mergeDeep from "../utils/mergeDeep";
 
-import { computed }  from '@ember/object';
+import { computed, action, getProperties }  from '@ember/object';
 import { assert } from '@ember/debug';
 
 import Pickr from 'pickr';
 
-const optionFields = [
-  "theme",
-  "closeOnScroll",
-  "appClass",
-  "useAsButton",
-  "inline",
-  "autoReposition",
-  "sliders",
-  "disabled",
-  "lockOpacity",
-  "outputPrecision",
-  "comparison",
-  "default",
-  "swatches",
-  "defaultRepresentation",
-  "showAlways",
-  "closeWithKey",
-  "position",
-  "adjustableNumbers"
+const OPTION_FIELDS = [
+  'theme',
+  'closeOnScroll',
+  'appClass',
+  'useAsButton',
+  'inline',
+  'autoReposition',
+  'sliders',
+  'disabled',
+  'lockOpacity',
+  'outputPrecision',
+  'comparison',
+  'default',
+  'swatches',
+  'defaultRepresentation',
+  'showAlways',
+  'closeWithKey',
+  'position',
+  'adjustableNumber'
 ];
+
+const DEFAULT_COMPONENTS = {
+  palette: true,
+  preview: true,
+  opacity: true,
+  hue: true,
+  interaction: {
+    hex: true,
+    rgba: true,
+    hsva: true,
+    input: true,
+    clear: true,
+    save: true
+  }
+};
 
 /**
  * class ColorPicker
  * @class ColorPicker
  * @public
  */
-const ColorPicker = Component.extend({
-  layout,
+export default class ColorPicker extends Component {/**
+  /**
+    Componennts
+    @argument components
+    @type {object}
+    @default '{}'
+  */
+  @arg(object) components = {}
 
   /**
     Which theme you want to use. Can be 'classic', 'monolith' or 'nano'
-   @argument theme
-   @type {'classic' | 'monolith' | 'nano'}
-   @default 'classic'
+    @argument theme
+    @type {'classic' | 'monolith' | 'nano'}
+    @default 'classic'
    */
-  theme: 'classic',
+  @arg(string) theme = 'classic'
 
   /**
     Nested scrolling is currently not supported and as this would be really sophisticated to add this
     it's easier to set this to true which will hide pickr if the user scrolls the area behind it.
-   @argument closeOnScroll
-   @type boolean
-   @default false
+    @argument closeOnScroll
+    @type boolean
+    @default false
    */
-  closeOnScroll: false,
+  @arg(bool) closeOnScroll = false
 
   /**
     Custom class which gets added to the pcr-app. Can be used to apply custom styles.
-   @argument appClass
-   @type string
+    @argument appClass
+    @type string
    */
-  appClass: null,
+  @arg(string) appClass = null
 
   /**
     Don't replace 'el' Element with the pickr-button, instead use 'el' as a button.
     If true, appendToBody will also be automatically true.
-   @argument useAsButton
-   @type boolean
-   @default false
+    @argument useAsButton
+    @type boolean
+    @default false
    */
-  useAsButton: false,
+  @arg(bool) useAsButton = false
 
   /**
     If true pickr won't be floating, and instead will append after the in el resolved element.
     Setting this to true will also set showAlways to true. It's possible to hide it via .hide() anyway.
-   @argument inline
-   @type boolean
-   @default false
+    @argument inline
+    @type boolean
+    @default false
    */
-  inline: false,
+  @arg(bool) inline = false
 
   /**
-   If true, pickr will be repositioned automatically on page scroll or window resize.
-   Can be set to false to make custom positioning easier.
-   @argument autoReposition
-   @type boolean
-   @default true
+    If true, pickr will be repositioned automatically on page scroll or window resize.
+    Can be set to false to make custom positioning easier.
+    @argument autoReposition
+    @type boolean
+    @default true
    */
-  autoReposition: true,
+  @arg(bool) autoReposition = true
 
   /**
-   Defines the direction in which the knobs of hue and opacity can be moved.
-   'v' => opacity- and hue-slider can both only moved vertically.
-   'hv' => opacity-slider can be moved horizontally and hue-slider vertically.
-   Can be used to apply custom layouts
-   @argument sliders
-   @type {'v' | 'hv'}
-   @default null
+    Defines the direction in which the knobs of hue and opacity can be moved.
+    'v' => opacity- and hue-slider can both only moved vertically.
+    'hv' => opacity-slider can be moved horizontally and hue-slider vertically.
+    Can be used to apply custom layouts
+    @argument sliders
+    @type {'v' | 'hv'}
+    @default null
    */
-  sliders: null,
+  @arg(string) sliders = null
 
   /**
     Start state. If true 'disabled' will be added to the button's classlist.
-   @argument disabled
-   @type boolean
-   @default false
+    @argument disabled
+    @type boolean
+    @default false
    */
-  disabled: false,
+  @arg(bool) disabled = false
 
   /**
     If true, the user won't be able to adjust any opacity.
     Opacity will be locked at 1 and the opacity slider will be removed.
     The HSVaColor object also doesn't contain an alpha, so the toString() methods just
     print HSV, HSL, RGB, HEX, etc.
-   @argument lockOpacity
-   @type boolean
-   @default false
+    @argument lockOpacity
+    @type boolean
+    @default false
    */
-  lockOpacity: false,
+  @arg(bool) lockOpacity = false
 
   /**
     Precision of output string (only effective if components.interaction.input is true)
-   @argument outputPrecision
-   @type number
-   @default 0
+    @argument outputPrecision
+    @type number
+    @default 0
    */
-  outputPrecision: 0,
+  @arg(number) outputPrecision = 0
 
   /**
     If set to false it would directly apply the selected color on the button and preview.
-   @argument comparison
-   @type boolean
-   @default true
+    @argument comparison
+    @type boolean
+    @default true
    */
-  comparison: true,
+  @arg(bool) comparison = true
 
   /**
-   Default color
-   @argument comparison
-   @type boolean
-   @default true
+    Default color
+    @argument comparison
+    @type string
+    @default '#42445a'
    */
-  default: '#42445a',
+  @arg(string) default = '#42445a'
 
   /**
     Optional color swatches. When null, swatches are disabled.
     Types are all those which can be produced by pickr e.g. hex(a), hsv(a), hsl(a), rgb(a), cmyk, and also CSS color names like 'magenta'.
     Example: swatches: ['#F44336', '#E91E63', '#9C27B0', '#673AB7'],
-   @argument swatches
-   @type boolean
+    @argument swatches
+    @type array
    */
-  swatches: null,
+  @arg(array) swatches = []
 
   /**
     Default color representation of the input/output textbox.
     Valid options are `HEX`, `RGBA`, `HSVA`, `HSLA` and `CMYK`.
-   @argument defaultRepresentation
-   @type {'HEX' | 'RGBA' | 'HSVA' | 'HSLA' | 'CMYK' }
-   @default true
+    @argument defaultRepresentation
+    @type {'HEX' | 'RGBA' | 'HSVA' | 'HSLA' | 'CMYK' }
+    @default true
    */
-  defaultRepresentation: 'HEX',
+  @arg(string) defaultRepresentation = 'HEX'
 
   /**
     Option to keep the color picker always visible.
     You can still hide / show it via 'pickr.hide()' and 'pickr.show()'.
     The save button keeps its functionality, so still fires the onSave event when clicked.
-   @argument showAlways
-   @type boolean
-   @default true
+    @argument showAlways
+    @type boolean
+    @default true
    */
-  showAlways: false,
+  @arg(bool) showAlways = false
 
   /**
     Close pickr with a keypress.
     Default is 'Escape'. Can be the event key or code.
     (see: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key)
-   @argument closeWithKey
-   @type string
-   @default 'Escape'
+    @argument closeWithKey
+    @type string
+    @default 'Escape'
    */
-  closeWithKey: 'Escape',
+  @arg(string) closeWithKey = 'Escape'
 
   /**
     Defines the position of the color-picker.
     Any combinations of top, left, bottom or right with one of these optional modifiers: start, middle, end
     Examples: top-start / right-end
     If clipping occurs, the color picker will automatically choose its position.
-   @argument position
-   @type string
-   @default 'bottom-middle'
+    @argument position
+    @type string
+    @default 'bottom-middle'
    */
-  position: 'bottom-middle',
+  @arg(string) position = 'bottom-middle'
 
   /**
     Enables the ability to change numbers in an input field with the scroll-wheel.
     To use it set the cursor on a position where a number is and scroll, use ctrl to make steps of five
-   @argument adjustableNumbers
-   @type boolean
-   @default true
+    @argument adjustableNumbers
+    @type boolean
+    @default true
    */
-  adjustableNumbers: true,
+  @arg(bool) adjustableNumbers = true
 
   /**
    * Initialization done - Pickr can be used
    * @argument onInit
    * @type {Function}
    */
-  onInit: undefined,
+  @arg(func) onInit
 
   /**
    * Pickr got closed
    * @argument onHide
    * @type {Function}
    */
-  onHide: undefined,
+  @arg(func) onHide
 
   /**
    * Pickr got opened
    * @argument onShow
    * @type {Function}
    */
-  onShow: undefined,
+  @arg(func) onShow
 
   /**
    * User clicked the save / clear button. Also fired on clear with `null` as color.
@@ -229,14 +252,14 @@ const ColorPicker = Component.extend({
    * @type {Function}
    * @param {HSVaColorObject} colorObject
    */
-  onSave: undefined,
+  @arg(func) onSave
 
   /**
    * Called after user cleared the color.
    * @argument onClear
    * @type {Function}
    */
-  onClear: undefined,
+  @arg(func) onClear
 
   /**
    * Called after color has changed (but not saved). Also fired on `swatchselect`.
@@ -244,7 +267,7 @@ const ColorPicker = Component.extend({
    * @type {Function}
    * @param {HSVaColorObject} colorObject
    */
-  onChange: undefined,
+  @arg(func) onChange
 
   /**
    * User has stopped changing the color.
@@ -252,14 +275,14 @@ const ColorPicker = Component.extend({
    * @type {Function}
    * @param {HSVaColorObject} colorObject
    */
-  onChangeStop: undefined,
+  @arg(func) onChangeStop
 
   /**
    * Called after user clicked the cancel button (return to previous color).
    * @argument onCancel
    * @type {Function}
    */
-  onCancel: undefined,
+  @arg(func) onCancel
 
   /**
    * Called after user clicked one of the swatches.
@@ -267,51 +290,55 @@ const ColorPicker = Component.extend({
    * @type {Function}
    * @param {HSVaColorObject} colorObject
    */
-  onSwatchSelect: undefined,
+  @arg(func) onSwatchSelect
 
-  didInsertElement() {
-    this._super(...arguments);
-    this._setupPickr();
-  },
+  @tracked pickr;
+  @tracked _options = {}
+  @tracked _value;
 
-  _setupPickr() {
+  get value() {
+    return this._value;
+  }
+
+  set value(value) {
+    if (this.pickr) {
+      let currentColor = this.formatColor(this.pickr.getColor());
+      // This check is to avoid setting the same color twice one after another
+      // Without this check, this will result in two computations for every color change
+      if (currentColor !== value) {
+        this.pickr.setColor(value);
+      }
+    }
+
+    return value;
+  }
+
+  @action
+  setupPickr(element) {
     this._options = {
-      ...this.getProperties(optionFields),
+      ...getProperties(this.args, OPTION_FIELDS),
       // Default color
-      default: this.get('value') || this.get('default') || 'fff',
+      default: this.value || this.default || 'fff',
       strings: {
-        save: this.get('saveLabel') || 'Save',
-        clear: this.get('clearLabel') || 'Clear',
-        cancel: this.get('cancelLabel') || 'Cancel',
+        save: this.args.saveLabel || 'Save',
+        clear: this.args.clearLabel || 'Clear',
+        cancel: this.args.cancelLabel || 'Cancel',
       }
     };
 
-    this._components = mergeDeep({
-      palette: true,
-      preview: true,
-      opacity: true,
-      hue: true,
+    this._components = mergeDeep(
+      DEFAULT_COMPONENTS,
+      this.components
+    );
 
-      interaction: {
-        hex: true,
-        rgba: true,
-        hsva: true,
-        input: true,
-        clear: true,
-        save: true
-      }
-    }, this.get('components'));
-
-    this._pickr = Pickr.create({
-      el: this.element,
-
+    this.pickr = Pickr.create({
+      el: element,
       ...this._options,
-
       components: this._components
     });
 
-    this._pickr.on('init', (...args) => {
-      this.set('_value', this.formatColor(this._pickr.getColor()));
+    this.pickr.on('init', (...args) => {
+      this._value = this.formatColor(this.pickr.getColor())
 
       if (this.onInit) {
         this.onInit(...args);
@@ -319,7 +346,7 @@ const ColorPicker = Component.extend({
     }).on('save', (...args) => {
       let [hsva, instance] = args;
       let value = this.formatColor(hsva);
-      this.set('_value', value);
+      this._value = value;
 
       if (this.onSave) {
         this.onSave(hsva, instance);
@@ -353,26 +380,7 @@ const ColorPicker = Component.extend({
         this.onSwatchSelect(...args);
       }
     });
-  },
-
-  value: computed('_value', {
-    get() {
-      return this.get('_value');
-    },
-
-    set(key, value) {
-      if (this._pickr) {
-        let currentColor = this.formatColor(this._pickr.getColor());
-        // This check is to avoid setting the same color twice one after another
-        // Without this check, this will result in two computations for every color change
-        if (currentColor !== value) {
-          this._pickr.setColor(value);
-        }
-      }
-
-      return value;
-    }
-  }),
+  }
 
   formatColor(hsva) {
     if (!hsva) {
@@ -380,7 +388,8 @@ const ColorPicker = Component.extend({
     }
 
     let value = hsva;
-    let format = this.get('format');
+    let format = this.format;
+
     if (format) {
       format = format.toUpperCase();
       // backward compat till next major version
@@ -397,12 +406,11 @@ const ColorPicker = Component.extend({
     }
 
     return value;
-  },
-
-  willDestroyElement() {
-    this._pickr.destroyAndRemove();
-    this._super(...arguments);
   }
-});
 
-export default ColorPicker;
+  willDestroy() {
+    this.pickr.destroyAndRemove();
+
+    super.willDestroy(...arguments);
+  }
+}

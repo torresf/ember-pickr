@@ -19,8 +19,8 @@ module.exports = {
   },
 
   choosePickrForTargets(targets = {}) {
-    let { browsers = [] } = targets;
-    let browserQuery = browsers.join(',');
+    const { browsers = [] } = targets;
+    const browserQuery = browsers.join(',');
     if (caniuse.isSupported('es6-module', browserQuery)) {
       return '@simonwep/pickr/dist/pickr.min.js';
     }
@@ -28,11 +28,11 @@ module.exports = {
     return '@simonwep/pickr/dist/pickr.es5.min.js';
   },
 
-  included: function() {
+  included: function () {
     this._super.included.apply(this, arguments);
 
-    let findHost = this._findHost;
-    let app = findHost.call(this);
+    const findHost = this._findHost;
+    const app = findHost.call(this);
     const options = buildOptions(app);
 
     this.app = app;
@@ -40,7 +40,7 @@ module.exports = {
     options.themes.forEach(theme =>
       app.import(`node_modules/@simonwep/pickr/dist/themes/${theme}.min.css`));
 
-    let targets = this.project.targets;
+    const targets = this.project.targets;
     this.options.autoImport.alias.pickr = this.choosePickrForTargets(targets);
   }
 };
