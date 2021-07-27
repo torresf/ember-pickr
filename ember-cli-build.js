@@ -6,8 +6,8 @@ module.exports = function (defaults) {
   let app = new EmberAddon(defaults, {
     // Add options here
     'ember-pickr': {
-      themes: ['classic', 'monolith', 'nano']
-    }
+      themes: ['classic', 'monolith', 'nano'],
+    },
   });
 
   /*

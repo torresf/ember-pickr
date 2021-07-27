@@ -13,14 +13,14 @@ export default Controller.extend({
         rgba: false,
         hsva: false,
         input: false,
-      }
+      },
     };
   },
 
   actions: {
     handleOnChange(hsva) {
       this.set('value', hsva.toHEXA().toString());
-    }
-  }
+    },
+  },
 });
 // END-SNIPPET

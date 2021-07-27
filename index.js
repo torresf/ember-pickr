@@ -14,8 +14,8 @@ module.exports = {
 
   options: {
     autoImport: {
-      alias: {}
-    }
+      alias: {},
+    },
   },
 
   choosePickrForTargets(targets = {}) {
@@ -37,10 +37,11 @@ module.exports = {
 
     this.app = app;
 
-    options.themes.forEach(theme =>
-      app.import(`node_modules/@simonwep/pickr/dist/themes/${theme}.min.css`));
+    options.themes.forEach((theme) =>
+      app.import(`node_modules/@simonwep/pickr/dist/themes/${theme}.min.css`)
+    );
 
     const targets = this.project.targets;
     this.options.autoImport.alias.pickr = this.choosePickrForTargets(targets);
-  }
+  },
 };

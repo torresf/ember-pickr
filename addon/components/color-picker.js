@@ -2,14 +2,11 @@
 
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
-import { arg } from 'ember-arg-types';
-import { object, func, string, bool, number, array } from 'prop-types';
-
-import mergeDeep from "../utils/mergeDeep";
-
 import { computed, action, getProperties }  from '@ember/object';
 import { assert } from '@ember/debug';
-
+import { arg } from 'ember-arg-types';
+import { object, func, string, bool, number, array } from 'prop-types';
+import mergeDeep from "ember-pickr/utils/mergeDeep";
 import Pickr from 'pickr';
 
 const OPTION_FIELDS = [
@@ -53,9 +50,9 @@ const DEFAULT_COMPONENTS = {
  * @class ColorPicker
  * @public
  */
-export default class ColorPicker extends Component {/**
+export default class ColorPicker extends Component {
   /**
-    Componennts
+    Components
     @argument components
     @type {object}
     @default '{}'

@@ -4,8 +4,8 @@
   <section class="docs-max-w-md docs-mx-auto docs-pb-8">
     <div class="docs-md">
       <div class="docs-flex docs-item-center">
-        {{#docs-demo class="docs-text-left" as |demo|}}
-          {{#demo.example}}
+        <DocsDemo @class="docs-text-left" as |demo|>
+          <demo.example>
             <p>The currently selected color is <strong>{{value}}</strong>.</p>
             <div class="docs-flex docs-justify-center">
               {{color-picker
@@ -14,8 +14,8 @@
                 class="docs-border"
               }}
             </div>
-          {{/demo.example}}
-        {{/docs-demo}}
+          </demo.example>
+        </DocsDemo>
       </div>
     </div>
   </section>
