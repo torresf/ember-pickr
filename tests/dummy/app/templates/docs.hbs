@@ -1,13 +1,13 @@
-{{#docs-viewer as |viewer|}}
-  {{#viewer.nav as |nav|}}
+<DocsViewer as |viewer|>
+  <viewer.nav as |nav|>
     {{nav.section "Introduction"}}
     {{nav.item "What is ember-pickr?" "docs.index"}}
-  {{/viewer.nav}}
-  {{#viewer.main}}
+  </viewer.nav>
+  <viewer.main>
     <div class="docs-container">
       <div class="docs-section">
         {{outlet}}
       </div>
     </div>
-  {{/viewer.main}}
-{{/docs-viewer}}
+  </viewer.main>
+</DocsViewer>

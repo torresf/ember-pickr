@@ -5,7 +5,7 @@ export default Controller.extend({
   actions: {
     onInit(pickrInstance) {
       pickrInstance.setColor(null);
-    }
-  }
+    },
+  },
 });
 // END-SNIPPET

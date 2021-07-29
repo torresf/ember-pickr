@@ -6,7 +6,7 @@ import hbs from 'htmlbars-inline-precompile';
 // This horror is because, pickr has CSS transitions
 // while values are set. Without these, most tests will fail.
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function getPickerElement(selector = '.pcr-app') {
@@ -14,10 +14,10 @@ function getPickerElement(selector = '.pcr-app') {
   return matches[matches.length - 1];
 }
 
-module('Integration | Component | color-picker', function(hooks) {
+module('Integration | Component | color-picker', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('it renders', async function(assert) {
+  test('it renders', async function (assert) {
     await render(hbs`{{color-picker default="#ffffff"}}`);
     await sleep(1000);
 
@@ -27,28 +27,35 @@ module('Integration | Component | color-picker', function(hooks) {
     );
   });
 
-  test('it applies the disabled property', async function(assert) {
+  test('it applies the disabled property', async function (assert) {
     await render(hbs`{{color-picker disabled=true}}`);
     await sleep(1000);
 
-    assert.ok(this.element.querySelector('.pcr-button').className.includes('disabled'));
+    assert.ok(
+      this.element.querySelector('.pcr-button').className.includes('disabled')
+    );
   });
 
-  test('it is not disabled by default', async function(assert) {
+  test('it is not disabled by default', async function (assert) {
     await render(hbs`{{color-picker}}`);
     await sleep(1000);
 
-    assert.notOk(this.element.querySelector('.pcr-button').className.includes('disabled'));
+    assert.notOk(
+      this.element.querySelector('.pcr-button').className.includes('disabled')
+    );
   });
 
-  test('it applies the comparison property', async function(assert) {
+  test('it applies the comparison property', async function (assert) {
     await render(hbs`{{color-picker comparison=false}}`);
     await sleep(1000);
 
-    assert.equal(this.element.querySelector('.pcr-button').style.transition, 'none 0s ease 0s');
+    assert.equal(
+      this.element.querySelector('.pcr-button').style.transition,
+      'none 0s ease 0s'
+    );
   });
 
-  test('it applies the default value', async function(assert) {
+  test('it applies the default value', async function (assert) {
     await render(hbs`{{color-picker default="#333"}}`);
     await sleep(1000);
 
@@ -58,7 +65,7 @@ module('Integration | Component | color-picker', function(hooks) {
     );
   });
 
-  test('it takes the color assigned to value in initial render', async function(assert) {
+  test('it takes the color assigned to value in initial render', async function (assert) {
     await render(hbs`{{color-picker value="#fff"}}`);
     await sleep(1000);
 
@@ -68,7 +75,7 @@ module('Integration | Component | color-picker', function(hooks) {
     );
   });
 
-  test('it takes the color assigned to value in initial render even when default is present', async function(assert) {
+  test('it takes the color assigned to value in initial render even when default is present', async function (assert) {
     await render(hbs`{{color-picker default="#ff0000" value="#fff"}}`);
     await sleep(1000);
 
@@ -78,48 +85,36 @@ module('Integration | Component | color-picker', function(hooks) {
     );
   });
 
-  test('it keeps the color palette hidden when rendered', async function(assert) {
+  test('it keeps the color palette hidden when rendered', async function (assert) {
     await render(hbs`{{color-picker}}`);
     await sleep(1000);
 
     // this is because the color picker is created as a child of body
-    assert.equal(
-      getComputedStyle(getPickerElement()).visibility,
-      'hidden'
-    );
+    assert.equal(getComputedStyle(getPickerElement()).visibility, 'hidden');
 
     // this is because the color picker is created as a child of body
-    assert.equal(
-      getComputedStyle(getPickerElement()).opacity,
-      0
-    );
+    assert.equal(getComputedStyle(getPickerElement()).opacity, 0);
   });
 
-  test('it opens the color palette when clicked', async function(assert) {
+  test('it opens the color palette when clicked', async function (assert) {
     await render(hbs`{{color-picker showAlways=true}}`);
     await sleep(1000);
     await click('.pcr-button');
 
     // this is because the color picker is created as a child of body
-    assert.equal(
-      getComputedStyle(getPickerElement()).visibility,
-      'visible'
-    );
+    assert.equal(getComputedStyle(getPickerElement()).visibility, 'visible');
 
     // this is because the color picker is created as a child of body
-    assert.equal(
-      getComputedStyle(getPickerElement()).opacity,
-      1
-    );
+    assert.equal(getComputedStyle(getPickerElement()).opacity, 1);
   });
 
-  test('it respects component options', async function(assert) {
+  test('it respects component options', async function (assert) {
     let components = {
       opacity: false,
       interaction: {
         rgba: false,
-        hsva: false
-      }
+        hsva: false,
+      },
     };
 
     this.set('componentOpts', components);
@@ -135,24 +130,23 @@ module('Integration | Component | color-picker', function(hooks) {
     );
   });
 
-  test('it respects the format option', async function(assert) {
+  test('it respects the format option', async function (assert) {
     this.set('color', '#123');
 
     await render(hbs`
       {{color-picker value=color format="hexa"}}
     `);
     await sleep(1000);
-    assert.equal(this.get('color'), '#112233');
+    assert.equal(this.color, '#112233');
 
     await render(hbs`
       {{color-picker value=color format="hsva"}}
     `);
     await sleep(1000);
-    assert.equal(this.get('color'), 'hsva(210, 66.66666666666667%, 20%, 1)');
-
+    assert.equal(this.color, 'hsva(210, 66.66666666666667%, 20%, 1)');
   });
 
-  test('it changes color when the bound value is changed', async function(assert) {
+  test('it changes color when the bound value is changed', async function (assert) {
     this.set('color', '#123');
 
     await render(hbs`
@@ -161,15 +155,15 @@ module('Integration | Component | color-picker', function(hooks) {
     `);
     await sleep(1000);
 
-    assert.equal(this.get('color'), '#112233');
+    assert.equal(this.color, '#112233');
     assert.equal(this.element.querySelector('input').value, '#112233');
 
     await fillIn('input', '#00ff00');
-    assert.equal(this.get('color'), '#00ff00');
+    assert.equal(this.color, '#00ff00');
   });
 
-  test('it supports null values', async function(assert) {
-    this.set('onInit', function(pickrInstance) {
+  test('it supports null values', async function (assert) {
+    this.set('onInit', function (pickrInstance) {
       pickrInstance.setColor(null);
     });
 
@@ -194,10 +188,10 @@ module('Integration | Component | color-picker', function(hooks) {
     );
   });
 
-  test('it proxies known pickr events', async function(assert) {
+  test('it proxies known pickr events', async function (assert) {
     // TODO: this should probably replaced by testdouble or sinon if used more often
     const calls = {};
-    const spyCall = (type) => () => calls[type] = true;
+    const spyCall = (type) => () => (calls[type] = true);
 
     this.set('color', '#123');
     this.set('onInit', spyCall('onInit'));
@@ -208,7 +202,15 @@ module('Integration | Component | color-picker', function(hooks) {
     this.set('onChange', spyCall('onChange'));
     this.set('onCancel', spyCall('onCancel'));
     this.set('onSwatchSelect', spyCall('onSwatchSelect'));
-    this.set('swatches', ['#343a40', '#e03131', '#c2255c', '#9c36b5', '#6741d9', '#3b5bdb', '#1971c2']);
+    this.set('swatches', [
+      '#343a40',
+      '#e03131',
+      '#c2255c',
+      '#9c36b5',
+      '#6741d9',
+      '#3b5bdb',
+      '#1971c2',
+    ]);
     this.set('components', {
       palette: true,
       preview: true,
@@ -223,8 +225,8 @@ module('Integration | Component | color-picker', function(hooks) {
         input: true,
         cancel: true,
         clear: true,
-        save: true
-      }
+        save: true,
+      },
     });
 
     await render(hbs`

@@ -12,7 +12,7 @@ export default Controller.extend({
         rgba: false,
         hsva: false,
         input: false,
-      }
+      },
     };
   },
 
@@ -29,7 +29,7 @@ export default Controller.extend({
 
     onInit(pickrInstance) {
       pickrInstance.setColor(null);
-    }
-  }
+    },
+  },
 });
 // END-SNIPPET
