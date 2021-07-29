@@ -2,8 +2,7 @@
 
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
-import { computed, action, getProperties }  from '@ember/object';
-import { assert } from '@ember/debug';
+import { action, getProperties }  from '@ember/object';
 import { arg } from 'ember-arg-types';
 import { object, func, string, bool, number, array } from 'prop-types';
 import mergeDeep from "ember-pickr/utils/mergeDeep";
@@ -52,9 +51,17 @@ const DEFAULT_COMPONENTS = {
  */
 export default class ColorPicker extends Component {
   /**
-    Components
+    The hexadecimal value of the color
+    @argument value
+    @type string
+    @default undefined
+   */
+  @arg value
+
+  /**
+    Show or hide specific components
     @argument components
-    @type {object}
+    @type object
     @default '{}'
   */
   @arg(object) components = {}
@@ -107,7 +114,7 @@ export default class ColorPicker extends Component {
     @argument autoReposition
     @type boolean
     @default true
-   */
+    */
   @arg(bool) autoReposition = true
 
   /**
@@ -282,6 +289,27 @@ export default class ColorPicker extends Component {
   @arg(func) onCancel
 
   /**
+   * Text label for 'Save' button
+   * @argument saveLabel
+   * @type {string}
+   */
+  @arg(string) saveLabel
+
+  /**
+    * Text label for 'Clear' button
+    * @argument clearLabel
+    * @type {string}
+    */
+  @arg(string) clearLabel
+
+  /**
+    * Text label for 'Ca' button
+    * @argument cancelLabel
+    * @type {string}
+    */
+  @arg(string) cancelLabel
+
+  /**
    * Called after user clicked one of the swatches.
    * @argument onSwatchSelect
    * @type {Function}
@@ -290,63 +318,38 @@ export default class ColorPicker extends Component {
   @arg(func) onSwatchSelect
 
   @tracked pickr;
-  @tracked _options = {}
-  @tracked _value;
-
-  get value() {
-    return this._value;
-  }
-
-  set value(value) {
-    if (this.pickr) {
-      let currentColor = this.formatColor(this.pickr.getColor());
-      // This check is to avoid setting the same color twice one after another
-      // Without this check, this will result in two computations for every color change
-      if (currentColor !== value) {
-        this.pickr.setColor(value);
-      }
-    }
-
-    return value;
-  }
 
   @action
   setupPickr(element) {
-    this._options = {
-      ...getProperties(this.args, OPTION_FIELDS),
+    const options = {
+      ...getProperties(this, OPTION_FIELDS),
       // Default color
       default: this.value || this.default || 'fff',
       strings: {
-        save: this.args.saveLabel || 'Save',
-        clear: this.args.clearLabel || 'Clear',
-        cancel: this.args.cancelLabel || 'Cancel',
+        save: this.saveLabel || 'Save',
+        clear: this.clearLabel || 'Clear',
+        cancel: this.cancelLabel || 'Cancel',
       }
     };
 
-    this._components = mergeDeep(
+    const components = mergeDeep(
       DEFAULT_COMPONENTS,
       this.components
     );
 
     this.pickr = Pickr.create({
       el: element,
-      ...this._options,
-      components: this._components
+      ...options,
+      components
     });
 
     this.pickr.on('init', (...args) => {
-      this._value = this.formatColor(this.pickr.getColor())
-
       if (this.onInit) {
         this.onInit(...args);
       }
     }).on('save', (...args) => {
-      let [hsva, instance] = args;
-      let value = this.formatColor(hsva);
-      this._value = value;
-
       if (this.onSave) {
-        this.onSave(hsva, instance);
+        this.onSave(...args);
       }
     }).on('hide', (...args) => {
       if (this.onHide) {
@@ -377,32 +380,6 @@ export default class ColorPicker extends Component {
         this.onSwatchSelect(...args);
       }
     });
-  }
-
-  formatColor(hsva) {
-    if (!hsva) {
-      return null;
-    }
-
-    let value = hsva;
-    let format = this.format;
-
-    if (format) {
-      format = format.toUpperCase();
-      // backward compat till next major version
-      if (format === 'HEX') {
-        format = 'HEXA';
-      }
-
-      assert(
-        '[ember-pickr]: Format must be one of HSVA, HSLA, RGBA, HEXA, CMYK',
-        ['HSVA', 'HSLA', 'RGBA', 'HEXA', 'CMYK'].includes(format)
-      );
-
-      value = value[`to${format}`]().toString();
-    }
-
-    return value;
   }
 
   willDestroy() {
