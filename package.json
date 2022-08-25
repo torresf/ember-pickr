@@ -32,7 +32,8 @@
     "ember-auto-import": "^1.2.19",
     "ember-cli-babel": "^7.26.6",
     "ember-cli-htmlbars": "^5.7.1",
-    "prop-types": "^15.7.2"
+    "prop-types": "^15.7.2",
+    "ember-arg-types": "^0.3.0"
   },
   "devDependencies": {
     "@ember/optional-features": "^2.0.0",
@@ -41,7 +42,6 @@
     "@glimmer/component": "^1.0.4",
     "@glimmer/tracking": "^1.0.4",
     "broccoli-asset-rev": "^3.0.0",
-    "ember-arg-types": "^0.3.0",
     "ember-auto-import": "^1.11.3",
     "ember-cli": "~3.27.0",
     "ember-cli-addon-docs": "^0.6.1",
